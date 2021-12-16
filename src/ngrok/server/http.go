@@ -33,7 +33,7 @@ Bad Request
 )
 
 // Listens for new http(s) connections from the public internet
-func startHttpListener(addr string, tlsCfg *tls.Config) (listener *conn.Listener) {
+func startHttpListener(addr ,subdomain_host string, tlsCfg *tls.Config) (listener *conn.Listener) {
 	// bind/listen for incoming connections
 	var err error
 	if listener, err = conn.Listen(addr, "pub", tlsCfg); err != nil {
@@ -48,7 +48,7 @@ func startHttpListener(addr string, tlsCfg *tls.Config) (listener *conn.Listener
 	log.Info("Listening for public %s connections on %v", proto, listener.Addr.String())
 	go func() {
 		for conn := range listener.Conns {
-			go httpHandler(conn, proto)
+			go httpHandler(conn,subdomain_host, proto)
 		}
 	}()
 
@@ -56,7 +56,7 @@ func startHttpListener(addr string, tlsCfg *tls.Config) (listener *conn.Listener
 }
 
 // Handles a new http connection from the public internet
-func httpHandler(c conn.Conn, proto string) {
+func httpHandler(c conn.Conn,subdomain_host, proto string) {
 	defer c.Close()
 	defer func() {
 		// recover from failures
@@ -75,9 +75,8 @@ func httpHandler(c conn.Conn, proto string) {
 		c.Write([]byte(BadRequest))
 		return
 	}
-
-	// read out the Host header and auth from the request
 	host := strings.ToLower(vhostConn.Host())
+
 	auth := vhostConn.Request.Header.Get("Authorization")
 
 	// done reading mux data, free up the request memory

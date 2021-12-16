@@ -1,5 +1,6 @@
 .PHONY: default server client deps fmt clean all release-all assets client-assets server-assets contributors
 export GOPATH:=$(shell pwd)
+export GO111MODULE=off
 
 BUILDTAGS=debug
 default: all

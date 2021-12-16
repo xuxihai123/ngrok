@@ -50,7 +50,7 @@ type Tunnel struct {
 }
 
 // Common functionality for registering virtually hosted protocols
-func registerVhost(t *Tunnel, protocol string, servingPort int) (err error) {
+func registerVhost(t *Tunnel, protocol,domainHost string, servingPort int) (err error) {
 	vhost := os.Getenv("VHOST")
 	if vhost == "" {
 		vhost = fmt.Sprintf("%s:%d", opts.domain, servingPort)
@@ -66,7 +66,9 @@ func registerVhost(t *Tunnel, protocol string, servingPort int) (err error) {
 	if strings.HasSuffix(vhost, defaultPortSuffix) {
 		vhost = vhost[0 : len(vhost)-len(defaultPortSuffix)]
 	}
-
+	if domainHost!=""{
+		vhost = domainHost
+	}
 	// Canonicalize by always using lower-case
 	vhost = strings.ToLower(vhost)
 
@@ -76,7 +78,6 @@ func registerVhost(t *Tunnel, protocol string, servingPort int) (err error) {
 		t.url = fmt.Sprintf("%s://%s", protocol, hostname)
 		return tunnelRegistry.Register(t.url, t)
 	}
-
 	// Register for specific subdomain
 	subdomain := strings.ToLower(strings.TrimSpace(t.req.Subdomain))
 	if subdomain != "" {
@@ -165,7 +166,7 @@ func NewTunnel(m *msg.ReqTunnel, ctl *Control) (t *Tunnel, err error) {
 			return
 		}
 
-		if err = registerVhost(t, proto, l.Addr.(*net.TCPAddr).Port); err != nil {
+		if err = registerVhost(t, proto, ctl.domainHost, l.Addr.(*net.TCPAddr).Port); err != nil {
 			return
 		}
 

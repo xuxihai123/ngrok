@@ -46,6 +46,7 @@ type Control struct {
 
 	// identifier
 	id string
+	domainHost string
 
 	// synchronizer for controlled shutdown of writer()
 	writerShutdown *util.Shutdown
@@ -60,7 +61,7 @@ type Control struct {
 	shutdown *util.Shutdown
 }
 
-func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
+func NewControl(ctlConn conn.Conn, authMsg *msg.Auth, domainHost string) {
 	var err error
 
 	// create the object
@@ -71,6 +72,7 @@ func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 		in:              make(chan msg.Message),
 		proxies:         make(chan conn.Conn, 10),
 		lastPing:        time.Now(),
+		domainHost: 	domainHost,
 		writerShutdown:  util.NewShutdown(),
 		readerShutdown:  util.NewShutdown(),
 		managerShutdown: util.NewShutdown(),
