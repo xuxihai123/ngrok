@@ -2,6 +2,7 @@ package server
 
 import (
 	"math/rand"
+	"ngrok/auth"
 	"ngrok/conn"
 	log "ngrok/log"
 	"ngrok/msg"
@@ -103,6 +104,9 @@ func Main() {
 
 	// init logging
 	log.LogTo(opts.logto, opts.loglevel)
+
+	// init secret path
+	auth.SetSecretPath(opts.secretPath)
 
 	// seed random number generator
 	seed, err := util.RandomSeed()
